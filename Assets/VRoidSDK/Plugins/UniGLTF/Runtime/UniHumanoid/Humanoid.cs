@@ -15,23 +15,38 @@ namespace UniHumanoid
     ///   * root の親は null
     /// </summary>
     [DisallowMultipleComponent]
-    public class Humanoid : MonoBehaviour
-    {
-        [SerializeField] private Transform m_Hips; public Transform Hips => m_Hips;
+    public class Humanoid : MonoBehaviour {
+        [SerializeField] private Transform m_Hips; public Transform Hips { get => m_Hips; set => m_Hips=value; }
 
         #region leg
-        [SerializeField] private Transform m_LeftUpperLeg; public Transform LeftUpperLeg => m_LeftUpperLeg;
-        [SerializeField] private Transform m_RightUpperLeg; public Transform RightUpperLeg => m_RightUpperLeg;
-        [SerializeField] private Transform m_LeftLowerLeg; public Transform LeftLowerLeg => m_LeftLowerLeg;
-        [SerializeField] private Transform m_RightLowerLeg; public Transform RightLowerLeg => m_RightLowerLeg;
-        [SerializeField] private Transform m_LeftFoot; public Transform LeftFoot => m_LeftFoot;
-        [SerializeField] private Transform m_RightFoot; public Transform RightFoot => m_RightFoot;
-        [SerializeField] private Transform m_LeftToes; public Transform LeftToes => m_LeftToes;
-        [SerializeField] private Transform m_RightToes; public Transform RightToes => m_RightToes;
+        [SerializeField] private Transform m_LeftUpperLeg; public Transform LeftUpperLeg { get => m_LeftUpperLeg; set => m_LeftUpperLeg = value; }
+        [SerializeField] private Transform m_RightUpperLeg; public Transform RightUpperLeg {
+            get => m_RightUpperLeg; set => m_RightUpperLeg = value;
+        }
+        [SerializeField] private Transform m_LeftLowerLeg; public Transform LeftLowerLeg {
+            get => m_LeftLowerLeg;
+        }
+        [SerializeField] private Transform m_RightLowerLeg; public Transform RightLowerLeg {
+            get => m_RightLowerLeg;
+        }
+        [SerializeField] private Transform m_LeftFoot; public Transform LeftFoot {
+            get => m_LeftFoot;
+        }
+        [SerializeField] private Transform m_RightFoot; public Transform RightFoot {
+            get => m_RightFoot;
+        }
+        [SerializeField] private Transform m_LeftToes; public Transform LeftToes {
+            get => m_LeftToes;
+        }
+        [SerializeField] private Transform m_RightToes; public Transform RightToes {
+            get => m_RightToes;
+        }
         #endregion
 
         #region spine
-        [SerializeField] private Transform m_Spine; public Transform Spine => m_Spine;
+        [SerializeField] private Transform m_Spine; public Transform Spine {
+            get => m_Spine; set => m_Spine = value;
+        }
         [SerializeField] private Transform m_Chest; public Transform Chest => m_Chest;
         [SerializeField] private Transform m_UpperChest; public Transform UpperChest => m_UpperChest;
         [SerializeField] private Transform m_Neck; public Transform Neck => m_Neck;
@@ -42,8 +57,12 @@ namespace UniHumanoid
         #endregion
 
         #region arm
-        [SerializeField] private Transform m_LeftShoulder; public Transform LeftShoulder => m_LeftShoulder;
-        [SerializeField] private Transform m_RightShoulder; public Transform RightShoulder => m_RightShoulder;
+        [SerializeField] private Transform m_LeftShoulder; public Transform LeftShoulder {
+            get => m_LeftShoulder; set => m_LeftShoulder = value;
+        }
+        [SerializeField] private Transform m_RightShoulder; public Transform RightShoulder {
+            get => m_RightShoulder; set => m_LeftShoulder = value;
+        }
         [SerializeField] private Transform m_LeftUpperArm; public Transform LeftUpperArm => m_LeftUpperArm;
         [SerializeField] private Transform m_RightUpperArm; public Transform RightUpperArm => m_RightUpperArm;
         [SerializeField] private Transform m_LeftLowerArm; public Transform LeftLowerArm => m_LeftLowerArm;

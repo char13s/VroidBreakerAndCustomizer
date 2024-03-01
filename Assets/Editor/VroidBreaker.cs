@@ -2,11 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using UniHumanoid;
+using Unity.Collections;
 
 [ExecuteInEditMode]
 
 public class VroidBreaker : EditorWindow
 {
+    GameObject mainBody;
     [MenuItem("Tools/Vroid Breaker")]
     public static void ShowWindow() {
         GetWindow<VroidBreaker>("Example");
@@ -23,6 +26,7 @@ public class VroidBreaker : EditorWindow
         }
     }
     private void ScanObject(GameObject go) {
+        mainBody = go;
         string mainName = go.name;
         GameObject root = null;
         GameObject hair = null;
@@ -38,6 +42,7 @@ public class VroidBreaker : EditorWindow
             body = go.transform.Find("Body").gameObject;
         ///---------------------------- might need to come back and save Secondary spring colliders with meshes---------------------------------------------
         //GameObject secondary = go.transform.Find("Secondary").gameObject;    
+        root.name = "Root";
         if (hair != null) {
             GameObject newHair = new GameObject();
         newHair.name = mainName + "'s Hair";
@@ -89,8 +94,11 @@ public class VroidBreaker : EditorWindow
         List<Material> shoeMats = new List<Material>();
         List<Material> topsMats = new List<Material>();
         List<Material> bottomsMats = new List<Material>();
+        NativeArray<byte> bones =new NativeArray<byte>();
+        //body.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetBoneWeights(bones);
         Material[] gameObjectMats = new Material[body.GetComponent<SkinnedMeshRenderer>().sharedMaterials.Length];
         body.GetComponent<SkinnedMeshRenderer>().sharedMaterials.CopyTo(gameObjectMats, 0);
+        //body.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetUVs(0,);
         foreach (Material mat in gameObjectMats) {
             if (mat.name.Contains("Shoe")) {
                 shoeMats.Add(mat);
@@ -113,12 +121,34 @@ public class VroidBreaker : EditorWindow
             else {
                 topsMats.Add(invisi);
             }
+            if (mat.name.Contains("Body")) { 
+            
+            }
         }
         if (createTop) {
             GameObject Top = new GameObject();
+            Top.AddComponent<Animator>().runtimeAnimatorController=Resources.Load("Pose")as RuntimeAnimatorController;
+            Top.GetComponent<Animator>().avatar = Resources.Load("Tops.avatar") as Avatar;
+            Humanoid rig=Top.AddComponent<Humanoid>();
+            //string hips=rig.Hips.name;
+            rig.Hips = root.transform.Find("J_Bip_C_Hips");
+            rig.Spine= root.transform.Find("J_Bip_C_Hips/J_Bip_C_Spine");
+            rig.RightUpperLeg= root.transform.Find("J_Bip_C_Hips/J_Bip_R_UpperLeg");
+            rig.LeftUpperLeg= root.transform.Find("J_Bip_C_Hips/J_Bip_L_UpperLeg");
+            rig.LeftShoulder= root.transform.Find("J_Bip_C_Hips/J_Bip_C_Spine/J_Bip_C_Chest/J_Bip_C_UpperChest/J_Bip_L_Shoulder");
+            rig.RightShoulder= root.transform.Find("J_Bip_C_Hips/J_Bip_C_Spine/J_Bip_C_Chest/J_Bip_C_UpperChest/J_Bip_R_Shoulder");
+            //rig.AssignBonesFromAnimator();
+            //HumanBodyBones bone1 =(HumanBodyBones) mainBody.GetComponent<Humanoid>().BoneMap;
+            //rig.AssignBones(bone1,rig.Hips);//= ;
+            //rig.AssignBonesFromAnimator();
+            // rig.CreateAvatar();
             Top.name = "Tops";
             Instantiate(root, Top.transform);
             GameObject top = Instantiate(body, Top.transform);
+            top.name = "Body";
+            top.GetComponent<SkinnedMeshRenderer>().rootBone = root.transform;
+            //bones = top.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetBonesPerVertex(); //= mainBody.GetComponent<SkinnedMeshRenderer>().sharedMesh.get
+            //top.GetComponent<SkinnedMeshRenderer>().sharedMesh.SetBoneWeights(bones, body.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetAllBoneWeights());
             top.GetComponent<SkinnedMeshRenderer>().sharedMaterials = topsMats.ToArray();
             PrefabThese(Top);
         }
@@ -127,6 +157,7 @@ public class VroidBreaker : EditorWindow
             Bottom.name = "Bottoms";
             Instantiate(root, Bottom.transform);
             GameObject bottom = Instantiate(body, Bottom.transform);
+            bottom.name = "Body";
             bottom.GetComponent<SkinnedMeshRenderer>().sharedMaterials = bottomsMats.ToArray();
             PrefabThese(Bottom);
         }
@@ -135,6 +166,7 @@ public class VroidBreaker : EditorWindow
             Shoe.name = "Shoes";
             Instantiate(root, Shoe.transform);
             GameObject shoe = Instantiate(body, Shoe.transform);
+            shoe.name = "Body";
             shoe.GetComponent<SkinnedMeshRenderer>().sharedMaterials = shoeMats.ToArray();
             PrefabThese(Shoe);
         }
