@@ -31,8 +31,24 @@ public class VroidBreaker : EditorWindow
         GameObject hair;
         if (go.transform.Find("Hair")) {
             hair = Instantiate(go);
-            hair.name = "Hair";
+            Mesh mesh = new Mesh();
             BlankTheObjects(hair, "Hair");
+            DestoryOffParts(hair);
+            SkinnedMeshRenderer skinnedMeshRenderer = hair.GetComponentInChildren<SkinnedMeshRenderer>();
+            skinnedMeshRenderer.BakeMesh(mesh);
+            mesh.SetBoneWeights(skinnedMeshRenderer.sharedMesh.GetBonesPerVertex(), skinnedMeshRenderer.sharedMesh.GetAllBoneWeights());
+            mesh.bindposes = skinnedMeshRenderer.sharedMesh.GetBindposes().ToArray();
+            hair.name = "Hair";
+            
+            if (AssetDatabase.Contains(mesh)) {
+                AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(mesh), "Assets/Resources/MeshDataAssets/"+hair.name+".asset");
+            }
+            else {
+                string localPath = "Assets/Resources/MeshDataAssets/NewMesh" + hair.name + ".asset";
+                localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
+                //PrefabUtility.SaveAsPrefabAsset(go, localPath);
+                AssetDatabase.CreateAsset(mesh, localPath);
+            }
             PrefabThese(hair);
         }
         else { 
@@ -46,9 +62,19 @@ public class VroidBreaker : EditorWindow
 
         BlankTheObjects(face, "Face");
         BlankTheObjects(body, "Body");
+        
+        DestoryOffParts(face);
+        DestoryOffParts(body);
         SplitBody(go, body);
 
         PrefabThese(face);
+    }
+    private void DestoryOffParts(GameObject go) {
+        foreach (Transform got in go.transform.GetChildren()) {
+            if (!got.gameObject.activeSelf) {
+                DestroyImmediate(got.gameObject);
+            }
+        }
     }
     private void BlankTheObjects(GameObject go, string desiredPart) {
 
@@ -67,7 +93,7 @@ public class VroidBreaker : EditorWindow
         string localPath = WhereToGo(go.name);
         localPath = AssetDatabase.GenerateUniqueAssetPath(localPath);
         PrefabUtility.SaveAsPrefabAsset(go, localPath);
-        //DestroyImmediate(go);
+        DestroyImmediate(go);
     }
     private string WhereToGo(string name) {
 
@@ -132,9 +158,9 @@ public class VroidBreaker : EditorWindow
             mesh.vertices = skinnedMeshRenderer.sharedMesh.vertices;
             topsMats.RemoveAt(0);
             topsMats.Insert(0, main);
-            Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterials[0] = main;
+            skinnedMeshRenderer.sharedMaterials[0] = main;
             Top.name = "Tops";
-            Humanoid rig = Top.GetComponent<Humanoid>();
+            Humanoid rig = root.GetComponent<Humanoid>();
             GameObject boxHolder = new GameObject();
             BoxCollider box = boxHolder.AddComponent<BoxCollider>();
             Vector3 right = rig.RightMiddleProximal.position;
@@ -154,13 +180,13 @@ public class VroidBreaker : EditorWindow
             }
             mesh.vertices = verts;
 
-            mesh.SetBoneWeights(Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetBonesPerVertex(), Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetAllBoneWeights());
-            mesh.bindposes = Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetBindposes().ToArray();
+            mesh.SetBoneWeights(skinnedMeshRenderer.sharedMesh.GetBonesPerVertex(), skinnedMeshRenderer.sharedMesh.GetAllBoneWeights());
+            mesh.bindposes = skinnedMeshRenderer.sharedMesh.GetBindposes().ToArray();
             skinnedMeshRenderer.sharedMesh = mesh;
-            skinnedMeshRenderer.sharedMesh.SetBoneWeights(Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetBonesPerVertex(), Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetAllBoneWeights());
+            skinnedMeshRenderer.sharedMesh.SetBoneWeights(skinnedMeshRenderer.sharedMesh.GetBonesPerVertex(), skinnedMeshRenderer.sharedMesh.GetAllBoneWeights());
             Instantiate(skinnedMeshRenderer.sharedMesh);
-            Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh = mesh;
-            Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterials = topsMats.ToArray();
+             skinnedMeshRenderer.sharedMesh = mesh;
+            skinnedMeshRenderer.sharedMaterials = topsMats.ToArray();
             //Mesh m = Top.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh;
             if (AssetDatabase.Contains(mesh)) {
                 AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(mesh), "Assets/Resources/MeshDataAssets");
@@ -186,7 +212,7 @@ public class VroidBreaker : EditorWindow
             //Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.
 
             
-            Humanoid rig = Bottom.GetComponent<Humanoid>();
+            Humanoid rig = root.GetComponent<Humanoid>();
             GameObject boxHolder = new GameObject();
             BoxCollider box = boxHolder.AddComponent<BoxCollider>();
             Vector3 right = rig.RightMiddleProximal.position;
@@ -197,7 +223,7 @@ public class VroidBreaker : EditorWindow
             float y = Vector3.Distance(up, down);
             box.size = new Vector3(x * 1.6f, y *0.8f, 2.2f);
             box.center = rig.Neck.position+new Vector3(0, 0.1f, 0);
-            Vector3 center = Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.bounds.center;
+            //Vector3 center = Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.bounds.center;
             box.isTrigger = true;
             Vector3[] verts = mesh.vertices;
             
@@ -206,10 +232,10 @@ public class VroidBreaker : EditorWindow
                     verts[i] = rig.Hips.position;
                 }
             }
-           
+            
             mesh.vertices = verts;
-            mesh.SetBoneWeights(Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetBonesPerVertex(), Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetAllBoneWeights());
-            mesh.bindposes = Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh.GetBindposes().ToArray();
+            mesh.SetBoneWeights(skinnedMeshRenderer.sharedMesh.GetBonesPerVertex(), skinnedMeshRenderer.sharedMesh.GetAllBoneWeights());
+            mesh.bindposes = skinnedMeshRenderer.sharedMesh.GetBindposes().ToArray();
             //mesh.RecalculateNormals();
             //mesh.RecalculateBounds();
             skinnedMeshRenderer.sharedMesh = mesh;
@@ -221,8 +247,8 @@ public class VroidBreaker : EditorWindow
             bottomsMats.RemoveAt(0);
             bottomsMats.Insert(0, main);
             Bottom.name = "Bottoms";
-            Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterials = bottomsMats.ToArray();
-            Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterials[0] = main;
+             skinnedMeshRenderer.sharedMaterials = bottomsMats.ToArray();
+            skinnedMeshRenderer.sharedMaterials[0] = main;
             //Bottom.GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh = skinnedMeshRenderer.sharedMesh;
             if (AssetDatabase.Contains(mesh)) {
                 //AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(mesh), "Assets/Resources/MeshDataAssets");
@@ -234,7 +260,7 @@ public class VroidBreaker : EditorWindow
                 AssetDatabase.CreateAsset(mesh, localPath);
             }
             PrefabThese(Bottom);
-            //DestroyImmediate(boxHolder);
+            DestroyImmediate(boxHolder);
         }
         if (createShoes) {
             GameObject Shoe = Instantiate(body);
