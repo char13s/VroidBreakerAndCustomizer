@@ -31,6 +31,7 @@ public class VroidBreaker : EditorWindow
         GameObject hair;
         if (go.transform.Find("Hair")) {
             hair = Instantiate(go);
+            hair.GetComponent<Animator>().enabled = false;
             Mesh mesh = new Mesh();
             BlankTheObjects(hair, "Hair");
             DestoryOffParts(hair);

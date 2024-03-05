@@ -32,11 +32,11 @@ public class CustomizeController : MonoBehaviour
     public int TopSetsIndex { get => topSetsIndex; set => topSetsIndex = Mathf.Clamp(value, 0, topSets.Count); }
     public int BottomSetsIndex { get => bottomSetsIndex; set => bottomSetsIndex = Mathf.Clamp(value, 0, bottomSets.Count); }
     public int ShoeSetsIndex { get => shoeSetsIndex; set => shoeSetsIndex = Mathf.Clamp(value, 0, shoeSets.Count); }
-    public GameObject CurrentHair { get => currentHair; set { currentHair = value; SetHair(); } }
-    public GameObject CurrentFace { get => currentFace; set { currentFace = value; SetFace(); } }
-    public GameObject CurrentTop { get => currentTop; set { currentTop = value; SetTop(); } }
-    public GameObject CurrentBottom { get => currentBottom; set { currentBottom = value; SetBottom(); } }
-    public GameObject CurrentShoe { get => currentShoe; set { currentShoe = value; SetShoe(); } }
+    public GameObject CurrentHair { get => currentHair; set {  currentHair = value; SetHair(); } }
+    public GameObject CurrentFace { get => currentFace; set {  currentFace = value; SetFace(); } }
+    public GameObject CurrentTop { get => currentTop; set {  currentTop = value; SetTop(); } }
+    public GameObject CurrentBottom { get => currentBottom; set { DestroyImmediate(currentBottom); currentBottom = value; SetBottom(); } }
+    public GameObject CurrentShoe { get => currentShoe; set { DestroyImmediate(currentShoe); currentShoe = value; SetShoe(); } }
 
     private void Start() {
         GetSets();
@@ -69,27 +69,31 @@ public class CustomizeController : MonoBehaviour
     private void SetHair() {
         if (hairTarget.transform.childCount > 0)
             DestroyImmediate(hairTarget.transform.GetChild(0).gameObject);
-        //Instantiate(currentHair, hairTarget.transform);'
-        GameObject top = Instantiate(currentHair);
+        //Instantiate(currentHair, );'
+        Instantiate(currentHair,hairTarget.transform);
+        hairTarget.transform.position = new Vector3(0,0,0);
         //top.transform.Find("secondary").gameObject.transform.SetParent(top.transform.Find("Hair"));
-        TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>());
+        //TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>());
     }
     private void SetFace() {
         if (faceTarget.transform.childCount > 0)
             DestroyImmediate(faceTarget.transform.GetChild(0).gameObject);
-        GameObject top = Instantiate(currentFace);
+        GameObject top = Instantiate(currentFace, faceTarget.transform);
+        top.name = "Face";
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>());
     }
     private void SetBottom() {
         if (bottomTarget.transform.childCount > 0)
             DestroyImmediate(bottomTarget.transform.GetChild(0).gameObject);
-        GameObject top = Instantiate(currentBottom);
+        GameObject top = Instantiate(currentBottom, bottomTarget.transform);
+        top.name = "Bottom";
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>());
     }
     private void SetTop() {
         if (topTarget.transform.childCount > 0)
             DestroyImmediate(topTarget.transform.GetChild(0).gameObject);
         GameObject top = Instantiate(currentTop);
+        top.name = "Top";
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>());
 
         //currentTop.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices= topTarget.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
@@ -143,7 +147,7 @@ public class CustomizeController : MonoBehaviour
         var newBones = new Transform[skin.bones.Length];
         for (var x = 0; x < skin.bones.Length; x++)
             foreach (var newBone in newArmature.GetComponentsInChildren<Transform>())
-                if (newBone.name == skin.bones[x].name) {
+                if (newBone.name == skin.bones[x].name&&newBone.name!="HairTarget") {
                     newBones[x] = newBone;
                 }
 
@@ -152,7 +156,7 @@ public class CustomizeController : MonoBehaviour
         skin.bones = newBones;
         Transform transform;
         (transform = skin.transform).SetParent(baseTarget.transform);
-        transform.localPosition = Vector3.zero;
+        //transform.localPosition = Vector3.zero;
 
 
     }
