@@ -25,13 +25,14 @@ public class VroidBreaker : EditorWindow
         }
     }
     private void ScanObject(GameObject go) {
-        go.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Pose") as RuntimeAnimatorController;
-        go.GetComponent<Animator>().applyRootMotion = true;
+        //go.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Pose") as RuntimeAnimatorController;
+        Animator anim = go.GetComponent<Animator>();
+        anim.enabled = false;
 
         GameObject hair;
         if (go.transform.Find("Hair")) {
             hair = Instantiate(go);
-            hair.GetComponent<Animator>().enabled = false;
+            //hair.GetComponent<Animator>().enabled = false;
             Mesh mesh = new Mesh();
             BlankTheObjects(hair, "Hair");
             DestoryOffParts(hair);
