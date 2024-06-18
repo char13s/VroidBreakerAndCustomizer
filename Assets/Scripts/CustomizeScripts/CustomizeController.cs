@@ -31,7 +31,6 @@ public class CustomizeController : MonoBehaviour
     [SerializeField] private Transform newArmature;
     [SerializeField] private GameObject neckBone;
     private GameObject hairRef;
-
     private SkinnedMeshRenderer[] skinnedMeshRenderersList;
     public int HairSetsIndex { get => hairSetsIndex; set => hairSetsIndex = Mathf.Clamp(value, 0, hairSets.Count); }
     public int FaceSetsIndex { get => faceSetsIndex; set => faceSetsIndex = Mathf.Clamp(value, 0, faceSets.Count); }
@@ -43,7 +42,6 @@ public class CustomizeController : MonoBehaviour
     public GameObject CurrentTop { get => currentTop; set { currentTop = value; SetTop(); } }
     public GameObject CurrentBottom { get => currentBottom; set { currentBottom = value; SetBottom(); } }
     public GameObject CurrentShoe { get => currentShoe; set { currentShoe = value; SetShoe(); } }
-
     private void Start() {
         GetSets();
         SetDefaults();
@@ -53,7 +51,6 @@ public class CustomizeController : MonoBehaviour
             CurrentTop = topSets[topSetsIndex];
         if (hairSets[hairSetsIndex])
             CurrentHair = hairSets[hairSetsIndex];
-        //hairTarget.transform.SetParent(neckBone.transform);
         if (faceSets[faceSetsIndex])
             CurrentFace = faceSets[faceSetsIndex];
         
@@ -61,7 +58,6 @@ public class CustomizeController : MonoBehaviour
             CurrentBottom = bottomSets[bottomSetsIndex];
         if (shoeSets[shoeSetsIndex])
             CurrentShoe = shoeSets[shoeSetsIndex];
-
     }
     private void GetSets() {
         foreach (GameObject go in Resources.LoadAll("MeshParts/Tops")) {
@@ -85,7 +81,6 @@ public class CustomizeController : MonoBehaviour
             baseTarget.GetComponent<Animator>().applyRootMotion = true;
             baseTarget.GetComponent<Animator>().Play("Idle");
             baseTarget.GetComponent<Animator>().Play("Idle 0");
-
             hairRef.GetComponent<Animator>().applyRootMotion = true;
             hairRef.GetComponent<Animator>().Play("Idle 0");
             hairRef.GetComponent<Animator>().Play("Idle");
@@ -100,22 +95,16 @@ public class CustomizeController : MonoBehaviour
         if (baseTarget.transform.Find("Hair")) {
             Destroy(baseTarget.transform.Find("Hair").gameObject);
         }
-        //Instantiate(currentHair, hairTarget.transform );
         GameObject top = Instantiate(currentHair);
         hairRef = top;
         top.GetComponentInChildren<SkinnedMeshRenderer>().rootBone = top.transform.Find("Root");
         top.transform.SetParent(baseTarget.transform);
-        //FindNeck(top,top.GetComponentInChildren<SkinnedMeshRenderer>());
-        //hairTarget.transform.position = new Vector3(0,0,0);
-        //top.transform.Find("secondary").gameObject.transform.SetParent(top.transform.Find("Hair"));
-        //TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Hair", baseTarget);
         top.name = "Hair";
         top.GetComponent<Animator>().runtimeAnimatorController = baseTarget.GetComponent<Animator>().runtimeAnimatorController;
         top.GetComponent<Animator>().enabled = true;
         ResetAnimation();
     }
     private void SetFace() {
-
         if (baseTarget.transform.Find("Face")) {
             GameObject face = baseTarget.transform.Find("Face").gameObject;
             DestroyImmediate(face);
@@ -123,6 +112,7 @@ public class CustomizeController : MonoBehaviour
         GameObject top = Instantiate(currentFace);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Face", baseTarget);
         ResetAnimation();
+        Destroy(top);
     }
     private void SetBottom() {
         if (baseTarget.transform.Find("Bottom")) {
@@ -132,46 +122,31 @@ public class CustomizeController : MonoBehaviour
         GameObject top = Instantiate(currentBottom);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Bottom", baseTarget);
         ResetAnimation();
+        Destroy(top);
     }
     private void SetTop() {
-
         GameObject oldBase = baseTarget;
-
         baseTarget = Instantiate(currentTop);
-        //GameObject top = 
-        //GameObject root=Instantiate(baseTarget.transform.Find("Root").gameObject);
-        newArmature = baseTarget.transform.Find("Root");//root.transform;
-baseTarget.GetComponent<Animator>().enabled = true;
+        newArmature = baseTarget.transform.Find("Root");
+        baseTarget.GetComponent<Animator>().enabled = true;
         if (currentFace != null) {
-
-            //TempMoveStuff(currentFace);
-            //TempMoveStuff(currentHair);
-            //TempMoveStuff(currentBottom);
             CurrentHair = hairSets[hairSetsIndex];
             CurrentFace = faceSets[faceSetsIndex];
             CurrentShoe = shoeSets[shoeSetsIndex];
             CurrentBottom = bottomSets[bottomSetsIndex];
-            //ReskinEverything(currentFace,currentHair,currentBottom,baseTarget);
         }
-        
-        //sResetAnimation();
+        baseTarget.name = "Player";
         DestroyImmediate(oldBase);
-        //TransferSkinnedMeshes(base.GetComponentInChildren<SkinnedMeshRenderer>(), "Top", topTarget);
-
-        //currentTop.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices= topTarget.GetComponent<SkinnedMeshRenderer>().sharedMesh.vertices;
-        //currentTop.GetComponent<SkinnedMeshRenderer>().rootBone = topTarget.GetComponent<SkinnedMeshRenderer>().rootBone;
-        //currentTop.GetComponent<SkinnedMeshRenderer>().sharedMesh.SetBoneWeights(topTarget.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetBonesPerVertex(), topTarget.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetAllBoneWeights());
-        //currentTop.GetComponent<SkinnedMeshRenderer>().sharedMesh.bindposes = topTarget.GetComponent<SkinnedMeshRenderer>().sharedMesh.GetBindposes().ToArray();
     }
     private void SetShoe() {
         if (baseTarget.transform.Find("Shoes")) {
             GameObject shoe = baseTarget.transform.Find("Shoes").gameObject;
             DestroyImmediate(shoe);
         }
-
         GameObject top = Instantiate(currentShoe);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Shoes", baseTarget);
         ResetAnimation();
+        Destroy(top);
     }
     public void CycleThruHair(int val) {
         HairSetsIndex += val;
@@ -208,19 +183,7 @@ baseTarget.GetComponent<Animator>().enabled = true;
         }
         CurrentShoe = shoeSets[shoeSetsIndex];
     }
-    private void ReskinEverything(GameObject face, GameObject hair, GameObject bottom, GameObject newBase) {
-        TransferSkinnedMeshes(hair.GetComponentInChildren<SkinnedMeshRenderer>(), "Hair", newBase);
-        TransferSkinnedMeshes(face.GetComponentInChildren<SkinnedMeshRenderer>(), "Face", newBase);
-        //TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Top", topTarget);
-        TransferSkinnedMeshes(bottom.GetComponentInChildren<SkinnedMeshRenderer>(), "Bottom", newBase);
-    }
-    private void TempMoveStuff(GameObject go) {
-
-        go.transform.SetParent(baseTarget.transform);
-    }
     private void TransferSkinnedMeshes(SkinnedMeshRenderer skin, string name, GameObject parent) {
-
-
         string cachedRootBoneName = skin.rootBone.name;
         var newBones = new Transform[skin.bones.Length];
         for (var x = 0; x < skin.bones.Length; x++) {
@@ -234,41 +197,9 @@ baseTarget.GetComponent<Animator>().enabled = true;
         Transform matchingRootBone = GetRootBoneByName(newArmature, cachedRootBoneName);
         skin.rootBone = matchingRootBone != null ? matchingRootBone : newArmature;
         skin.bones = newBones;
-
         Transform transform;
         (transform = skin.transform).SetParent(parent.transform);
-        //transform.localPosition = Vector3.zero;
         transform.gameObject.name = name;
-
-    }
-    private void FindNeck(GameObject hair, SkinnedMeshRenderer skin) {
-        //SkinnedMeshRenderer skin = baseTarget.GetComponentInChildren<SkinnedMeshRenderer>();
-        string cachedRootBoneName = skin.rootBone.name;
-        var newBones = new Transform[skin.bones.Length];
-        for (int x = 0; x < skin.bones.Length; x++) {
-            foreach (var newBone in newArmature.GetComponentsInChildren<Transform>()) {
-                if (newBone.name.Contains("Head") && !neckBone) {
-                    neckBone = newBone.gameObject;
-                }
-                else if (neckBone) {
-                    print(newBone.name);
-                    if (newBone.name.Contains("Head")) {//newBone.name == skin.bones[x].name
-                        print("meep");
-                        newBones[x] = newBone;
-                        newBone.transform.SetParent(neckBone.transform);
-                    }
-                }
-                //find all hair bones and copy them into an array or set them to parent to head?
-            }
-        }
-        Transform matchingRootBone = GetRootBoneByName(newArmature, cachedRootBoneName);
-        skin.rootBone = matchingRootBone != null ? matchingRootBone : newArmature;
-        //skin.bones = newBones;
-        Transform transform;
-        (transform = skin.transform).SetParent(baseTarget.transform);
-        //transform.localPosition = Vector3.zero;
-        transform.gameObject.name = "Hair";
-        Destroy(hair);
     }
     static Transform GetRootBoneByName(Transform parentTransform, string name) {
         return parentTransform.GetComponentsInChildren<Transform>().FirstOrDefault(transformChild => transformChild.name == name);
