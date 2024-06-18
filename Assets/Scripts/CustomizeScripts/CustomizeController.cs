@@ -30,6 +30,7 @@ public class CustomizeController : MonoBehaviour
     [SerializeField] private GameObject baseTarget;
     [SerializeField] private Transform newArmature;
     [SerializeField] private GameObject neckBone;
+    private GameObject hairRef;
 
     private SkinnedMeshRenderer[] skinnedMeshRenderersList;
     public int HairSetsIndex { get => hairSetsIndex; set => hairSetsIndex = Mathf.Clamp(value, 0, hairSets.Count); }
@@ -45,16 +46,21 @@ public class CustomizeController : MonoBehaviour
 
     private void Start() {
         GetSets();
-
         SetDefaults();
     }
     private void SetDefaults() {
-        CurrentTop = topSets[topSetsIndex];
+        if (topSets[topSetsIndex])
+            CurrentTop = topSets[topSetsIndex];
+        if (hairSets[hairSetsIndex])
+            CurrentHair = hairSets[hairSetsIndex];
         //hairTarget.transform.SetParent(neckBone.transform);
-        CurrentFace = faceSets[faceSetsIndex];
-        CurrentHair = hairSets[hairSetsIndex];
-        CurrentBottom = bottomSets[bottomSetsIndex];
-        CurrentShoe = shoeSets[shoeSetsIndex];
+        if (faceSets[faceSetsIndex])
+            CurrentFace = faceSets[faceSetsIndex];
+        
+        if (bottomSets[bottomSetsIndex])
+            CurrentBottom = bottomSets[bottomSetsIndex];
+        if (shoeSets[shoeSetsIndex])
+            CurrentShoe = shoeSets[shoeSetsIndex];
 
     }
     private void GetSets() {
@@ -74,12 +80,29 @@ public class CustomizeController : MonoBehaviour
             shoeSets.Add(go);
         }
     }
-    private void SetHair() {      
+    private void ResetAnimation() {
+        if (hairRef != null) {
+            baseTarget.GetComponent<Animator>().applyRootMotion = true;
+            baseTarget.GetComponent<Animator>().Play("Idle");
+            baseTarget.GetComponent<Animator>().Play("Idle 0");
+
+            hairRef.GetComponent<Animator>().applyRootMotion = true;
+            hairRef.GetComponent<Animator>().Play("Idle 0");
+            hairRef.GetComponent<Animator>().Play("Idle");
+        }
+        else {
+            baseTarget.GetComponent<Animator>().applyRootMotion = true;
+            baseTarget.GetComponent<Animator>().Play("Idle");
+            baseTarget.GetComponent<Animator>().Play("Idle 0");
+        }
+    }
+    private void SetHair() {
         if (baseTarget.transform.Find("Hair")) {
             Destroy(baseTarget.transform.Find("Hair").gameObject);
         }
         //Instantiate(currentHair, hairTarget.transform );
         GameObject top = Instantiate(currentHair);
+        hairRef = top;
         top.GetComponentInChildren<SkinnedMeshRenderer>().rootBone = top.transform.Find("Root");
         top.transform.SetParent(baseTarget.transform);
         //FindNeck(top,top.GetComponentInChildren<SkinnedMeshRenderer>());
@@ -89,12 +112,7 @@ public class CustomizeController : MonoBehaviour
         top.name = "Hair";
         top.GetComponent<Animator>().runtimeAnimatorController = baseTarget.GetComponent<Animator>().runtimeAnimatorController;
         top.GetComponent<Animator>().enabled = true;
-        baseTarget.GetComponent<Animator>().applyRootMotion = true;
-        top.GetComponent<Animator>().applyRootMotion = true;
-        baseTarget.GetComponent<Animator>().Play("Idle 0");
-        top.GetComponent<Animator>().Play("Idle 0");
-        baseTarget.GetComponent<Animator>().Play("Idle");
-        top.GetComponent<Animator>().Play("Idle");
+        ResetAnimation();
     }
     private void SetFace() {
 
@@ -104,6 +122,7 @@ public class CustomizeController : MonoBehaviour
         }
         GameObject top = Instantiate(currentFace);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Face", baseTarget);
+        ResetAnimation();
     }
     private void SetBottom() {
         if (baseTarget.transform.Find("Bottom")) {
@@ -112,6 +131,7 @@ public class CustomizeController : MonoBehaviour
         }
         GameObject top = Instantiate(currentBottom);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Bottom", baseTarget);
+        ResetAnimation();
     }
     private void SetTop() {
 
@@ -121,7 +141,7 @@ public class CustomizeController : MonoBehaviour
         //GameObject top = 
         //GameObject root=Instantiate(baseTarget.transform.Find("Root").gameObject);
         newArmature = baseTarget.transform.Find("Root");//root.transform;
-
+baseTarget.GetComponent<Animator>().enabled = true;
         if (currentFace != null) {
 
             //TempMoveStuff(currentFace);
@@ -133,7 +153,8 @@ public class CustomizeController : MonoBehaviour
             CurrentBottom = bottomSets[bottomSetsIndex];
             //ReskinEverything(currentFace,currentHair,currentBottom,baseTarget);
         }
-        baseTarget.GetComponent<Animator>().enabled = true;
+        
+        //sResetAnimation();
         DestroyImmediate(oldBase);
         //TransferSkinnedMeshes(base.GetComponentInChildren<SkinnedMeshRenderer>(), "Top", topTarget);
 
@@ -150,6 +171,7 @@ public class CustomizeController : MonoBehaviour
 
         GameObject top = Instantiate(currentShoe);
         TransferSkinnedMeshes(top.GetComponentInChildren<SkinnedMeshRenderer>(), "Shoes", baseTarget);
+        ResetAnimation();
     }
     public void CycleThruHair(int val) {
         HairSetsIndex += val;
